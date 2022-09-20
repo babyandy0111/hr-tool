@@ -396,7 +396,9 @@ func getJson(excel *excelize.File) *excelize.File {
 
 		// fmt.Println(row)
 		// fmt.Println(q, month[0], month[1], row.Name)
-		if (month[1] == *m && month[0] == strconv.Itoa(q)) && (row.Name != "" && row.IsHoliday == "是" && row.HolidayCategory == "星期六、星期日") {
+		// fmt.Println((month[1] == *m && month[0] == strconv.Itoa(q)), (row.Name != "" && row.IsHoliday == "是" && row.HolidayCategory == "星期六、星期日"))
+
+		if (month[1] == *m && month[0] == strconv.Itoa(q)) && (row.Name != "" && row.IsHoliday == "是" && (row.HolidayCategory == "星期六、星期日" || row.HolidayCategory == "放假之紀念日及節日")) {
 			//fmt.Println(month[1])
 			// fmt.Println(q, month[0], month[1], row.Name)
 			x = x + 1
