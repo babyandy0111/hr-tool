@@ -273,10 +273,19 @@ func randTime(newExcel *excelize.File, name string) {
 		fmt.Println(err)
 		return
 	}
+
 	for u, rowP := range person {
-		if u < 7 {
+		if u < 6 {
 			continue
 		}
+
+		if u == 36 {
+			if *m == "2" || *m == "4" || *m == "6" || *m == "9" || *m == "11" {
+				continue
+			}
+		}
+
+		fmt.Println(u, rowP, *m)
 		time.Sleep(100 * time.Millisecond)
 
 		sH := randomInt(9, 10)
