@@ -1,46 +1,110 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"math/rand"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"time"
 )
 
+type SendData struct {
+	Subject   string          `json:"subject"`
+	Body      BodyContent     `json:"body"`
+	Start     StartDate       `json:"start"`
+	End       EndDate         `json:"end"`
+	Attendees []AttendeesData `json:"attendees"`
+}
+
+type BodyContent struct {
+	ContentType string `json:"content_type"`
+	Content     string `json:"content"`
+}
+
+type StartDate struct {
+	DateTime string `json:"dateTime"`
+	TimeZone string `json:"timeZone"`
+}
+
+type EndDate struct {
+	DateTime string `json:"dateTime"`
+	TimeZone string `json:"timeZone"`
+}
+
+type AttendeesData struct {
+	EmailAddress EmailAddress `json:"emailAddress"`
+	AType        string       `json:"type"`
+}
+
+type EmailAddress struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
+}
+
 func main() {
-	//var age int
-	//var name string
-	//var phone string
-	//
-	//fmt.Println("what's your name：")
-	//fmt.Scanln(&name)
-	//
-	//fmt.Println("how old are you：")
-	//fmt.Scanln(&age)
-	//
-	//fmt.Println("may i have your phone number：")
-	//fmt.Scanln(&phone)
-	//
-	//fmt.Println("我認識你了！")
-	//fmt.Println("你的名字是：", name)
-	//fmt.Println("年齡：", age)
-	//fmt.Println("電話：", phone)
+	token := ""
+	send(token)
+}
 
-	rand.Seed(time.Now().UnixNano())
-	var box = rand.Intn(20)
-	var num int
-	fmt.Println(box)
-
-	// fmt.Println("請猜數字：")
-	//fmt.Scanln(&num)
-	for {
-		fmt.Println("請輸入一個數字，20以下：")
-		fmt.Scan(&num)
-		if num == box {
-			fmt.Println("猜對了！")
-			break
-		} else {
-			fmt.Println("猜錯了!，請重新輸入：")
-		}
+func send(token string) {
+	content := BodyContent{
+		ContentType: "HTML",
+		Content:     "請假事由～ TEST",
+	}
+	sdate := StartDate{
+		DateTime: time.Now().UTC().Format("2006-01-02T03:04:05"),
+		TimeZone: "Coordinated Universal Time",
+	}
+	edate := EndDate{
+		DateTime: time.Now().UTC().Format("2006-01-02T03:04:05"),
+		TimeZone: "Coordinated Universal Time",
 	}
 
+	var attDate []AttendeesData
+	tmp := AttendeesData{
+		EmailAddress: EmailAddress{
+			Address: "team@gaia.net",
+			Name:    "MSG_GAIA CORP",
+		},
+		AType: "required",
+	}
+
+	attDate = append(attDate, tmp)
+
+	var postData = SendData{
+		Subject:   "test on leave",
+		Body:      content,
+		Start:     sdate,
+		End:       edate,
+		Attendees: attDate,
+	}
+	body, _ := json.Marshal(postData)
+
+	req, _ := http.NewRequest("POST", "https://graph.microsoft.com/v1.0/me/events", strings.NewReader(string(body)))
+	req.Header.Set("Authorization", "bearer "+token)
+	req.Header.Set("Content-type", "application/json")
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		fmt.Println("save topic failed", err.Error())
+		panic(err)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusCreated {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		jsonStr := string(body)
+		fmt.Println("Response: ", jsonStr)
+
+	} else {
+		fmt.Println("Get failed with error: ", resp.Status)
+	}
 }
