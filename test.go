@@ -10,11 +10,11 @@ import (
 )
 
 type SendData struct {
-	Subject   string          `json:"subject"`
-	Body      BodyContent     `json:"body"`
-	Start     StartDate       `json:"start"`
-	End       EndDate         `json:"end"`
-	Attendees []AttendeesData `json:"attendees"`
+	Subject string `json:"subject"`
+	// Body    BodyContent `json:"body"`
+	Start StartDate `json:"start"`
+	End   EndDate   `json:"end"`
+	// Attendees []AttendeesData `json:"attendees"`
 }
 
 type BodyContent struct {
@@ -48,24 +48,24 @@ func main() {
 }
 
 func send(token string) {
-	content := BodyContent{
-		ContentType: "HTML",
-		Content:     "請假事由～ TEST",
-	}
+	//content := BodyContent{
+	//	ContentType: "HTML",
+	//	Content:     "請假事由～ TEST",
+	//}
 	sdate := StartDate{
 		DateTime: time.Now().UTC().Format("2006-01-02T03:04:05"),
-		TimeZone: "Coordinated Universal Time",
+		TimeZone: "UTC",
 	}
 	edate := EndDate{
 		DateTime: time.Now().UTC().Format("2006-01-02T03:04:05"),
-		TimeZone: "Coordinated Universal Time",
+		TimeZone: "UTC",
 	}
 
 	var attDate []AttendeesData
 	tmp := AttendeesData{
 		EmailAddress: EmailAddress{
-			Address: "team@gaia.net",
-			Name:    "MSG_GAIA CORP",
+			Address: "",
+			Name:    "",
 		},
 		AType: "required",
 	}
@@ -73,16 +73,17 @@ func send(token string) {
 	attDate = append(attDate, tmp)
 
 	var postData = SendData{
-		Subject:   "test on leave",
-		Body:      content,
-		Start:     sdate,
-		End:       edate,
-		Attendees: attDate,
+		Subject: "test on leave",
+		// Body:    content,
+		Start: sdate,
+		End:   edate,
+		// Attendees: attDate,
 	}
 	body, _ := json.Marshal(postData)
 
+	fmt.Println(string(body))
 	req, _ := http.NewRequest("POST", "https://graph.microsoft.com/v1.0/me/events", strings.NewReader(string(body)))
-	req.Header.Set("Authorization", "bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-type", "application/json")
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
