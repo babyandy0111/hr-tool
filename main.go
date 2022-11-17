@@ -285,7 +285,7 @@ func randTime(newExcel *excelize.File, name string) {
 			}
 		}
 
-		fmt.Println(u, rowP, *m)
+		// fmt.Println(u, rowP, *m)
 		time.Sleep(100 * time.Millisecond)
 
 		sH := randomInt(9, 10)
